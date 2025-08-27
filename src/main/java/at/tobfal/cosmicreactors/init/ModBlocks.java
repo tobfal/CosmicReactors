@@ -1,10 +1,9 @@
 package at.tobfal.cosmicreactors.init;
 
 import at.tobfal.cosmicreactors.CosmicReactors;
-import at.tobfal.cosmicreactors.block.PulsarReactorBlock;
+import at.tobfal.cosmicreactors.block.BasePulsarReactorBlock;
 import at.tobfal.cosmicreactors.block.PulsarReactorPortBlock;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
@@ -12,14 +11,13 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(CosmicReactors.MODID);
 
     // Pulsar Fragment Reactor
     public static final DeferredBlock<Block> PULSAR_REACTOR_CASING = registerBlock("pulsar_reactor_casing",
-            PulsarReactorBlock::new);
+            BasePulsarReactorBlock::new);
     public static final DeferredBlock<Block> PULSAR_REACTOR_PORT = registerBlock("pulsar_reactor_port",
             PulsarReactorPortBlock::new);
 

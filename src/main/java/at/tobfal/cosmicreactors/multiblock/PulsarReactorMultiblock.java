@@ -1,6 +1,6 @@
 package at.tobfal.cosmicreactors.multiblock;
 
-import at.tobfal.cosmicreactors.block.PulsarReactorBlock;
+import at.tobfal.cosmicreactors.block.BasePulsarReactorBlock;
 import at.tobfal.cosmicreactors.block.PulsarReactorPortBlock;
 import at.tobfal.cosmicreactors.block.entity.PulsarReactorPortBlockEntity;
 import at.tobfal.cosmicreactors.data.PulsarReactorSavedData;
@@ -8,9 +8,13 @@ import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +59,9 @@ public final class PulsarReactorMultiblock {
 
         PulsarReactorSavedData data = PulsarReactorSavedData.get(level);
 
+        UUID id = null;
+
         if (formed) {
-            UUID id = null;
             for (var port : ports) {
                 if (port.getReactorId() != null) {
                     id = port.getReactorId();
@@ -73,8 +78,12 @@ public final class PulsarReactorMultiblock {
                 port.setFormed(true);
                 port.setReactorId(id);
             }
+
+            Vec3 center = r.bounds().getCenter();
+            level.sendParticles(ParticleTypes.SCRAPE,center.x + 0.5f,center.y + 0.5f, center.z + 0.5f,
+                    50,1f,1f,1f,0.5f);
+            level.playSound(null, around, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 5.0f, 1.4f);
         } else {
-            UUID id = null;
             for (var port : ports) {
                 if (port.getReactorId() != null) {
                     id = port.getReactorId();
@@ -95,7 +104,7 @@ public final class PulsarReactorMultiblock {
 
     private static boolean isPart(BlockState state) {
         // TODO: Probably a BlockTag is the better way
-        return state.getBlock() instanceof PulsarReactorBlock;
+        return state.getBlock() instanceof BasePulsarReactorBlock;
     }
 
     private static LongOpenHashSet flood(ServerLevel level, BlockPos start) {

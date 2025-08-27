@@ -10,7 +10,6 @@ import net.minecraft.world.level.saveddata.SavedDataType;
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 public class PulsarReactorSavedData extends SavedData {

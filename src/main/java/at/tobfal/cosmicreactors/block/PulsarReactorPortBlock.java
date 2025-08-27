@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public class PulsarReactorPortBlock extends PulsarReactorBlock implements EntityBlock {
+public class PulsarReactorPortBlock extends BasePulsarReactorBlock implements EntityBlock {
     public PulsarReactorPortBlock(Properties properties) {
         super(properties);
     }
