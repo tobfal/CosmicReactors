@@ -2,11 +2,13 @@ package at.tobfal.cosmicreactors;
 
 import at.tobfal.cosmicreactors.init.ModBlockEntities;
 import at.tobfal.cosmicreactors.init.ModBlocks;
+import at.tobfal.cosmicreactors.init.ModCommands;
 import at.tobfal.cosmicreactors.init.ModItems;
 import net.neoforged.fml.ModList;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +26,8 @@ public class CosmicReactors {
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
+
+        NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

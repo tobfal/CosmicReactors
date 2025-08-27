@@ -3,6 +3,7 @@ package at.tobfal.cosmicreactors.multiblock;
 import at.tobfal.cosmicreactors.block.PulsarReactorBlock;
 import at.tobfal.cosmicreactors.block.PulsarReactorPortBlock;
 import at.tobfal.cosmicreactors.block.entity.PulsarReactorPortBlockEntity;
+import at.tobfal.cosmicreactors.data.PulsarReactorSavedData;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
@@ -10,6 +11,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public final class PulsarReactorMultiblock {
     private PulsarReactorMultiblock() {}
@@ -39,11 +44,51 @@ public final class PulsarReactorMultiblock {
         }
         boolean formed = r.formed() && hasPort;
 
+        List<PulsarReactorPortBlockEntity> ports = new ArrayList<>();
         for (long l : r.members()) {
-            var pos = BlockPos.of(l);
-            var be = level.getBlockEntity(pos);
+            BlockPos p = BlockPos.of(l);
+            var be = level.getBlockEntity(p);
             if (be instanceof PulsarReactorPortBlockEntity port) {
-                port.setFormed(formed);
+                ports.add(port);
+            }
+        }
+
+        PulsarReactorSavedData data = PulsarReactorSavedData.get(level);
+
+        if (formed) {
+            UUID id = null;
+            for (var port : ports) {
+                if (port.getReactorId() != null) {
+                    id = port.getReactorId();
+                    break;
+                }
+            }
+
+            if (id == null) {
+                id = UUID.randomUUID();
+            }
+
+            data.add(id);
+            for (var port : ports) {
+                port.setFormed(true);
+                port.setReactorId(id);
+            }
+        } else {
+            UUID id = null;
+            for (var port : ports) {
+                if (port.getReactorId() != null) {
+                    id = port.getReactorId();
+                    break;
+                }
+            }
+
+            if (id != null){
+                data.remove(id);
+            }
+
+            for (var port : ports) {
+                port.setFormed(false);
+                port.setReactorId(null);
             }
         }
     }
