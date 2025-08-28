@@ -4,10 +4,12 @@ import at.tobfal.cosmicreactors.block.BasePulsarReactorBlock;
 import at.tobfal.cosmicreactors.block.PulsarReactorPortBlock;
 import at.tobfal.cosmicreactors.block.entity.PulsarReactorPortBlockEntity;
 import at.tobfal.cosmicreactors.data.PulsarReactorSavedData;
+import at.tobfal.cosmicreactors.entity.PulsarReactorCoreEntity;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -73,16 +75,19 @@ public final class PulsarReactorMultiblock {
                 id = UUID.randomUUID();
             }
 
-            data.add(id);
+            data.put(id, r.bounds());
             for (var port : ports) {
                 port.setFormed(true);
                 port.setReactorId(id);
             }
 
-            Vec3 center = r.bounds().getCenter();
-            level.sendParticles(ParticleTypes.SCRAPE,center.x + 0.5f,center.y + 0.5f, center.z + 0.5f,
-                    50,1f,1f,1f,0.5f);
-            level.playSound(null, around, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 5.0f, 1.4f);
+            if (!level.isClientSide()) {
+                Vec3 center = r.bounds().getCenter();
+                BlockPos centerPos = new BlockPos((int) center.x,(int) center.y,(int) center.z);
+                level.sendParticles(ParticleTypes.SCRAPE, center.x, center.y, center.z,50,1f,1f,1f,0.5f);
+                level.playSound(null, centerPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 5.0f, 1.4f);
+                level.addFreshEntity(new PulsarReactorCoreEntity(level, center.x + 0.5, center.y, center.z + 0.5));
+            }
         } else {
             for (var port : ports) {
                 if (port.getReactorId() != null) {

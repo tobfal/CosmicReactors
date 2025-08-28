@@ -26,11 +26,11 @@ public class CosmicReactorsCommand {
         ServerLevel level = source.getServer().overworld();
         PulsarReactorSavedData data = PulsarReactorSavedData.get(level);
 
-        if (data.all().isEmpty()) {
+        if (data.getIds().isEmpty()) {
             source.sendSuccess(() -> Component.literal("[CosmicReactors] No Pulsar Reactors registered."), false);
         } else {
             source.sendSuccess(() -> Component.literal("[CosmicReactors] Registered Pulsar Reactors:"), false);
-            for (UUID id : data.all()) {
+            for (UUID id : data.getIds()) {
                 source.sendSuccess(() -> Component.literal("- " + id.toString()), false);
             }
         }
