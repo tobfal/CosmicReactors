@@ -1,7 +1,10 @@
-// 1.21.8	2025-08-27T22:57:04.5598992	Model Definitions - cosmicreactors
+// 1.21.8	2025-08-29T05:17:22.8901605	Model Definitions - cosmicreactors
 17b48f2a11eaa86a9c4a265795b40de175e357e3 assets/cosmicreactors/blockstates/pulsar_reactor_casing.json
+817a35fa42215e545f60c55baddd6fba815cc196 assets/cosmicreactors/blockstates/pulsar_reactor_glass.json
 20671d1f6783bda759a0eccf9a8785a6d2d896da assets/cosmicreactors/blockstates/pulsar_reactor_port.json
 d2da072cab8ac604b7fb0e50a485fa243f38b70d assets/cosmicreactors/items/pulsar_reactor_casing.json
+dfd92fcb6468aad16f1037ae44fc7fda754bf076 assets/cosmicreactors/items/pulsar_reactor_glass.json
 4fda0f10ec6bcddaf0a85874b3cea5c9cd031292 assets/cosmicreactors/items/pulsar_reactor_port.json
 4dca5ee0a773680fa32a2c272f06aeb06a99d5fc assets/cosmicreactors/models/block/pulsar_reactor_casing.json
+888a4f966e3ac3edf3480b2dc4dc62d18d16fed8 assets/cosmicreactors/models/block/pulsar_reactor_glass.json
 5a6590d5cb3339230285b5878d8ee50529b06113 assets/cosmicreactors/models/block/pulsar_reactor_port.json

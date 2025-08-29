@@ -18,6 +18,8 @@ public class ModBlocks {
     // Pulsar Fragment Reactor
     public static final DeferredBlock<Block> PULSAR_REACTOR_CASING = registerBlock("pulsar_reactor_casing",
             BasePulsarReactorBlock::new);
+    public static final DeferredBlock<Block> PULSAR_REACTOR_GLASS = registerBlock("pulsar_reactor_glass",
+            properties -> new BasePulsarReactorBlock(properties.noOcclusion().isViewBlocking((s,l,p) -> false)));
     public static final DeferredBlock<Block> PULSAR_REACTOR_PORT = registerBlock("pulsar_reactor_port",
             PulsarReactorPortBlock::new);
 

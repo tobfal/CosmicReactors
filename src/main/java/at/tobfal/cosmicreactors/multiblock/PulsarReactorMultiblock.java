@@ -39,7 +39,9 @@ public final class PulsarReactorMultiblock {
 
     public static void rebuildAt(ServerLevel level, BlockPos around) {
         Result r = scanAround(level, around);
-        if (r.members().isEmpty()) return;
+        if (r.members().isEmpty()) {
+            return;
+        }
 
         boolean hasPort = false;
         for (long l : r.members()) {
@@ -71,6 +73,14 @@ public final class PulsarReactorMultiblock {
                 }
             }
 
+            if (!level.isClientSide() && id == null) {
+                Vec3 center = r.bounds().getCenter();
+                BlockPos centerPos = new BlockPos((int) center.x,(int) center.y,(int) center.z);
+                level.sendParticles(ParticleTypes.SCRAPE, center.x, center.y, center.z,50,1f,1f,1f,0.5f);
+                level.playSound(null, centerPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 5.0f, 1.4f);
+                level.addFreshEntity(new PulsarReactorCoreEntity(level, center.x + 0.5, center.y, center.z + 0.5));
+            }
+
             if (id == null) {
                 id = UUID.randomUUID();
             }
@@ -79,14 +89,6 @@ public final class PulsarReactorMultiblock {
             for (var port : ports) {
                 port.setFormed(true);
                 port.setReactorId(id);
-            }
-
-            if (!level.isClientSide()) {
-                Vec3 center = r.bounds().getCenter();
-                BlockPos centerPos = new BlockPos((int) center.x,(int) center.y,(int) center.z);
-                level.sendParticles(ParticleTypes.SCRAPE, center.x, center.y, center.z,50,1f,1f,1f,0.5f);
-                level.playSound(null, centerPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 5.0f, 1.4f);
-                level.addFreshEntity(new PulsarReactorCoreEntity(level, center.x + 0.5, center.y, center.z + 0.5));
             }
         } else {
             for (var port : ports) {
@@ -148,26 +150,52 @@ public final class PulsarReactorMultiblock {
         }
         return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
     }
-    private static boolean validateStructure(ServerLevel level, LongOpenHashSet group, AABB b) {
-        int minX = (int) b.minX, minY = (int) b.minY, minZ = (int) b.minZ;
-        int maxX = (int) b.maxX, maxY = (int) b.maxY, maxZ = (int) b.maxZ;
+    private static boolean validateStructure(ServerLevel level, LongOpenHashSet group, AABB aabb) {
+        int minX = (int) aabb.minX, minY = (int) aabb.minY, minZ = (int) aabb.minZ;
+        int maxX = (int) aabb.maxX, maxY = (int) aabb.maxY, maxZ = (int) aabb.maxZ;
 
-        if ((maxX - minX) != 2 || (maxY - minY) != 2 || (maxZ - minZ) != 2) return false;
-        if (group.size() != 26) return false;
+        if ((maxX - minX) != 2 || (maxY - minY) != 2 || (maxZ - minZ) != 2){
+            return false;
+        }
+
+        if (group.size() < 13){
+            return false;
+        }
 
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
                 for (int z = minZ; z <= maxZ; z++) {
                     BlockPos p = new BlockPos(x, y, z);
-                    boolean shell = x == minX || x == maxX || y == minY || y == maxY || z == minZ || z == maxZ;
-                    if (shell) {
-                        if (!group.contains(p.asLong())) return false;
-                    } else {
-                        if (!level.isEmptyBlock(p)) return false;
+                    boolean core = x == minX + 1 && y == minY + 1 && z == minZ + 1;
+                    if (core) {
+                        if (!level.getBlockState(p).isEmpty()) {
+                            return false;
+                        }
+
+                        continue;
+                    }
+
+                    boolean cross = x == minX + 1 || y == minY + 1 || z == minZ + 1;
+                    if (!cross) {
+                        continue;
+                    }
+
+                    boolean center = x - minX == y - minY || x - minX == z - minZ || y - minY == z - minZ;
+                    if (center) {
+                        if (!group.contains(p.asLong())) {
+                            return false;
+                        }
+
+                        continue;
+                    }
+
+                    if (!group.contains(p.asLong())) {
+                        return false;
                     }
                 }
             }
         }
+
         return true;
     }
 }
