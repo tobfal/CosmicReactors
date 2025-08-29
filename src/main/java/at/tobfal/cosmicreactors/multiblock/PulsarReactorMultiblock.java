@@ -32,9 +32,8 @@ public final class PulsarReactorMultiblock {
         if (members.isEmpty()) {
             return new Result(false, new AABB(0,0,0,0,0,0), members);
         }
-        AABB bounds = boundsOf(members);
-        boolean formed = validateStructure(level, members, bounds);
-        return new Result(formed, bounds, members);
+        AABB bounds = getValidAABB(level, members);
+        return new Result(bounds != null, bounds, members);
     }
 
     public static void rebuildAt(ServerLevel level, BlockPos around) {
@@ -77,8 +76,8 @@ public final class PulsarReactorMultiblock {
                 Vec3 center = r.bounds().getCenter();
                 BlockPos centerPos = new BlockPos((int) center.x,(int) center.y,(int) center.z);
                 level.sendParticles(ParticleTypes.SCRAPE, center.x, center.y, center.z,50,1f,1f,1f,0.5f);
-                level.playSound(null, centerPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 5.0f, 1.4f);
-                level.addFreshEntity(new PulsarReactorCoreEntity(level, center.x + 0.5, center.y, center.z + 0.5));
+                level.playSound(null, centerPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 2.0f, 0.4f);
+                level.addFreshEntity(new PulsarReactorCoreEntity(level, center.x, center.y, center.z));
             }
 
             if (id == null) {
@@ -136,56 +135,35 @@ public final class PulsarReactorMultiblock {
         return out;
     }
 
-    private static AABB boundsOf(LongOpenHashSet set) {
-        int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
-        int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
-        for (long l : set) {
-            BlockPos p = BlockPos.of(l);
-            if (p.getX() < minX) minX = p.getX();
-            if (p.getY() < minY) minY = p.getY();
-            if (p.getZ() < minZ) minZ = p.getZ();
-            if (p.getX() > maxX) maxX = p.getX();
-            if (p.getY() > maxY) maxY = p.getY();
-            if (p.getZ() > maxZ) maxZ = p.getZ();
+    private static AABB getValidAABB(ServerLevel level, LongOpenHashSet group) {
+        for (long l : group) {
+            BlockPos center = BlockPos.of(l).above();
+            if (!level.getBlockState(center).isAir()) {
+                continue;
+            }
+
+            if (matchesAt(level, group, center)) {
+                return new AABB(center).inflate(1);
+            }
         }
-        return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
+
+        return null;
     }
-    private static boolean validateStructure(ServerLevel level, LongOpenHashSet group, AABB aabb) {
-        int minX = (int) aabb.minX, minY = (int) aabb.minY, minZ = (int) aabb.minZ;
-        int maxX = (int) aabb.maxX, maxY = (int) aabb.maxY, maxZ = (int) aabb.maxZ;
 
-        if ((maxX - minX) != 2 || (maxY - minY) != 2 || (maxZ - minZ) != 2){
-            return false;
-        }
+    private static boolean matchesAt(ServerLevel level, LongOpenHashSet group, BlockPos center) {
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    BlockPos p = center.offset(dx, dy, dz);
 
-        if (group.size() < 13){
-            return false;
-        }
-
-        for (int x = minX; x <= maxX; x++) {
-            for (int y = minY; y <= maxY; y++) {
-                for (int z = minZ; z <= maxZ; z++) {
-                    BlockPos p = new BlockPos(x, y, z);
-                    boolean core = x == minX + 1 && y == minY + 1 && z == minZ + 1;
-                    if (core) {
-                        if (!level.getBlockState(p).isEmpty()) {
-                            return false;
-                        }
-
-                        continue;
+                    boolean required;
+                    if (dy == 0) {
+                        required = !(dx == 0 && dz == 0);
+                    } else {
+                        required = (Math.abs(dx) + Math.abs(dz)) <= 1;
                     }
 
-                    boolean cross = x == minX + 1 || y == minY + 1 || z == minZ + 1;
-                    if (!cross) {
-                        continue;
-                    }
-
-                    boolean center = x - minX == y - minY || x - minX == z - minZ || y - minY == z - minZ;
-                    if (center) {
-                        if (!group.contains(p.asLong())) {
-                            return false;
-                        }
-
+                    if (!required) {
                         continue;
                     }
 

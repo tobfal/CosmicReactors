@@ -55,7 +55,7 @@ public class PulsarReactorCoreEntity extends Entity {
         }
 
         ServerLevel serverLevel = (ServerLevel)this.level();
-        serverLevel.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY() + 0.5, this.getZ(),
+        serverLevel.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY(), this.getZ(),
                 1, 0.0, 0.0, 0.0, 0.01);
     }
 }
