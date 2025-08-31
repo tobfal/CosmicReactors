@@ -1,17 +1,24 @@
 package at.tobfal.cosmicreactors.block.entity;
 
+import at.tobfal.cosmicreactors.energy.ModEnergyStorage;
 import at.tobfal.cosmicreactors.init.ModBlockEntities;
+import at.tobfal.cosmicreactors.multiblock.PulsarReactorAPI;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class PulsarReactorPortBlockEntity extends BlockEntity {
+public class PulsarReactorPortBlockEntity extends BlockEntity implements IEnergyStorage, ITickableBlockEntity {
     private boolean formed;
     private @Nullable UUID reactorId;
 
@@ -44,13 +51,138 @@ public class PulsarReactorPortBlockEntity extends BlockEntity {
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.putBoolean("formed", formed);
-        output.storeNullable("reactorId", UUIDUtil.CODEC, reactorId);
+        output.storeNullable("reactorId", UUIDUtil.STRING_CODEC, reactorId);
     }
 
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         this.formed = input.getBooleanOr("formed", false);
-        this.reactorId = input.read("reactorId", UUIDUtil.CODEC).orElse(null);
+        this.reactorId = input.read("reactorId", UUIDUtil.STRING_CODEC).orElse(null);
+    }
+
+    public boolean isReactorPart() {
+        return isFormed() && reactorId != null;
+    }
+
+    @Override
+    public int receiveEnergy(int toReceive, boolean simulate) {
+        var level = getLevel();
+        if (level == null || level.isClientSide() || !isFormed() || !isReactorPart()) {
+            return 0;
+        }
+
+        ServerLevel serverLevel = (ServerLevel)level;
+        ModEnergyStorage energyStorage = PulsarReactorAPI.getRecord(serverLevel, reactorId).energyStorage();
+        int received = energyStorage.receiveEnergy(toReceive, simulate);
+
+        if (!simulate) {
+            PulsarReactorAPI.setEnergyStorage(serverLevel, reactorId, energyStorage);
+        }
+
+        return received;
+    }
+
+    @Override
+    public int extractEnergy(int toExtract, boolean simulate) {
+        var level = getLevel();
+        if (level == null || level.isClientSide() || !isReactorPart()) {
+            return 0;
+        }
+
+        ServerLevel serverLevel = (ServerLevel)level;
+        ModEnergyStorage energyStorage = PulsarReactorAPI.getRecord(serverLevel, reactorId).energyStorage();
+        int extracted = energyStorage.extractEnergy(toExtract, simulate);
+
+        if (!simulate) {
+            PulsarReactorAPI.setEnergyStorage(serverLevel, reactorId, energyStorage);
+        }
+
+        return extracted;
+    }
+
+    @Override
+    public int getEnergyStored() {
+        var level = PulsarReactorPortBlockEntity.this.level;
+        if (level == null || level.isClientSide() || !isReactorPart()) {
+            return 0;
+        }
+
+        ServerLevel serverLevel = (ServerLevel)level;
+        ModEnergyStorage energyStorage = PulsarReactorAPI.getRecord(serverLevel, reactorId).energyStorage();
+        return energyStorage.getEnergyStored();
+    }
+
+    @Override
+    public int getMaxEnergyStored() {
+        var level = PulsarReactorPortBlockEntity.this.level;
+        if (level == null || level.isClientSide() || !isReactorPart()) {
+            return 0;
+        }
+
+        ServerLevel serverLevel = (ServerLevel)level;
+        ModEnergyStorage energyStorage = PulsarReactorAPI.getRecord(serverLevel, reactorId).energyStorage();
+        return energyStorage.getMaxEnergyStored();
+    }
+
+    @Override
+    public boolean canExtract() {
+        var level = PulsarReactorPortBlockEntity.this.level;
+        if (level == null || level.isClientSide() || !isReactorPart()) {
+            return false;
+        }
+
+        ServerLevel serverLevel = (ServerLevel)level;
+        ModEnergyStorage energyStorage = PulsarReactorAPI.getRecord(serverLevel, reactorId).energyStorage();
+        return energyStorage.canExtract();
+    }
+
+    @Override
+    public boolean canReceive() {
+        var level = PulsarReactorPortBlockEntity.this.level;
+        if (level == null || level.isClientSide() || !isReactorPart()) {
+            return false;
+        }
+
+        ServerLevel serverLevel = (ServerLevel)level;
+        ModEnergyStorage energyStorage = PulsarReactorAPI.getRecord(serverLevel, reactorId).energyStorage();
+        return energyStorage.canReceive();
+    }
+
+
+    @Override
+    public void tick(Level level, BlockPos blockPos, BlockState state) {
+        if (level.isClientSide()) {
+            return;
+        }
+
+        transferEnergy(level, blockPos, state, this);
+    }
+
+    private static void transferEnergy(Level level, BlockPos blockPos, BlockState state, PulsarReactorPortBlockEntity blockEntity) {
+        if (level.isClientSide()) {
+            return;
+        }
+
+        for (Direction direction : Direction.values()) {
+            BlockPos testPos = blockPos.relative(direction);
+            BlockEntity testBlockEntity = level.getBlockEntity(testPos);
+            if (testBlockEntity == null) {
+                continue;
+            }
+
+            IEnergyStorage foreignEnergyStorage = level.getCapability(Capabilities.EnergyStorage.BLOCK, testPos, level.getBlockState(testPos), testBlockEntity, direction.getOpposite());
+            if (foreignEnergyStorage == null || !foreignEnergyStorage.canReceive()) {
+                continue;
+            }
+
+            int toExtract = blockEntity.extractEnergy(blockEntity.getEnergyStored(), true);
+            toExtract = foreignEnergyStorage.receiveEnergy(toExtract, false);
+            if (toExtract <= 0) {
+                continue;
+            }
+
+            blockEntity.extractEnergy(toExtract, false);
+        }
     }
 }

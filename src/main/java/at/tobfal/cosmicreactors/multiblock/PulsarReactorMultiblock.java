@@ -3,13 +3,12 @@ package at.tobfal.cosmicreactors.multiblock;
 import at.tobfal.cosmicreactors.block.BasePulsarReactorBlock;
 import at.tobfal.cosmicreactors.block.PulsarReactorPortBlock;
 import at.tobfal.cosmicreactors.block.entity.PulsarReactorPortBlockEntity;
-import at.tobfal.cosmicreactors.data.PulsarReactorSavedData;
+import at.tobfal.cosmicreactors.energy.ModEnergyStorage;
 import at.tobfal.cosmicreactors.entity.PulsarReactorCoreEntity;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -60,8 +59,6 @@ public final class PulsarReactorMultiblock {
             }
         }
 
-        PulsarReactorSavedData data = PulsarReactorSavedData.get(level);
-
         UUID id = null;
 
         if (formed) {
@@ -72,19 +69,22 @@ public final class PulsarReactorMultiblock {
                 }
             }
 
-            if (!level.isClientSide() && id == null) {
+            if (id != null) {
+                return;
+            }
+
+            id = UUID.randomUUID();
+
+            if (!level.isClientSide()) {
                 Vec3 center = r.bounds().getCenter();
                 BlockPos centerPos = new BlockPos((int) center.x,(int) center.y,(int) center.z);
                 level.sendParticles(ParticleTypes.SCRAPE, center.x, center.y, center.z,50,1f,1f,1f,0.5f);
                 level.playSound(null, centerPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 2.0f, 0.4f);
                 level.addFreshEntity(new PulsarReactorCoreEntity(level, center.x, center.y, center.z));
+
+                PulsarReactorAPI.getOrCreateRecord(level, id, new ModEnergyStorage(1_000_000, 1_000_000, 1_000_000, 500_000));
             }
 
-            if (id == null) {
-                id = UUID.randomUUID();
-            }
-
-            data.put(id, r.bounds());
             for (var port : ports) {
                 port.setFormed(true);
                 port.setReactorId(id);
@@ -97,8 +97,8 @@ public final class PulsarReactorMultiblock {
                 }
             }
 
-            if (id != null){
-                data.remove(id);
+            if (!level.isClientSide() && id != null){
+                PulsarReactorAPI.removeRecord(level, id);
             }
 
             for (var port : ports) {

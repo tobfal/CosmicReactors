@@ -1,13 +1,17 @@
 package at.tobfal.cosmicreactors.command;
 
-import at.tobfal.cosmicreactors.data.PulsarReactorSavedData;
+import at.tobfal.cosmicreactors.multiblock.PulsarReactorAPI;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-
-import java.util.UUID;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 
 public class CosmicReactorsCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -18,22 +22,68 @@ public class CosmicReactorsCommand {
                                 .then(Commands.literal("pulsarreactors")
                                         .executes(ctx -> listReactors(ctx.getSource()))
                                 )
+                                .then(Commands.literal("energy")
+                                        .then(Commands.literal("get")
+                                                .then(Commands.argument("position", BlockPosArgument.blockPos())
+                                                        .executes(ctx -> getEnergyAtPosition(ctx.getSource(), BlockPosArgument.getBlockPos(ctx, "position")))
+                                                )
+                                        )
+                                        .then(Commands.literal("extract")
+                                                .then(Commands.argument("position", BlockPosArgument.blockPos())
+                                                        .then(Commands.argument("amount", IntegerArgumentType.integer(1))
+                                                            .executes(ctx ->
+                                                                    extractEnergyAtPosition(ctx.getSource(), BlockPosArgument.getBlockPos(ctx, "position"), IntegerArgumentType.getInteger(ctx, "amount")))
+                                                        )
+                                                )
+                                        )
+                                )
                         )
         );
     }
 
     private static int listReactors(CommandSourceStack source) {
         ServerLevel level = source.getServer().overworld();
-        PulsarReactorSavedData data = PulsarReactorSavedData.get(level);
+        var reactors = PulsarReactorAPI.getAllReactors(level);
 
-        if (data.getIds().isEmpty()) {
+        if (reactors.isEmpty()) {
             source.sendSuccess(() -> Component.literal("[CosmicReactors] No Pulsar Reactors registered."), false);
         } else {
             source.sendSuccess(() -> Component.literal("[CosmicReactors] Registered Pulsar Reactors:"), false);
-            for (UUID id : data.getIds()) {
-                source.sendSuccess(() -> Component.literal("- " + id.toString()), false);
+            for (var entry : reactors.entrySet()) {
+                var reactor = entry.getValue();
+                source.sendSuccess(() -> Component.literal("- " + reactor.id().toString() + " --- " +  reactor.energyStorage().getEnergyStored()), false);
             }
         }
+        return 1;
+    }
+
+    private static int getEnergyAtPosition(CommandSourceStack source, BlockPos pos) {
+        ServerLevel level = source.getLevel();
+
+        var energyStorage = level.getCapability(Capabilities.EnergyStorage.BLOCK, pos, Direction.DOWN);
+
+        if (energyStorage == null) {
+            source.sendFailure(Component.literal("[CosmicReactors] No energy storage found at " + pos + "."));
+            return 1;
+        }
+
+        int energy = energyStorage.getEnergyStored();
+        source.sendSuccess(() -> Component.literal("[CosmicReactors] Energy level: " + energy + " RF."), false);
+        return 1;
+    }
+
+    private static int extractEnergyAtPosition(CommandSourceStack source, BlockPos pos, int energy) {
+        ServerLevel level = source.getLevel();
+
+        var energyStorage = level.getCapability(Capabilities.EnergyStorage.BLOCK, pos, Direction.DOWN);
+
+        if (energyStorage == null) {
+            source.sendFailure(Component.literal("[CosmicReactors] No energy storage found at " + pos + "."));
+            return 1;
+        }
+
+        int extracted = energyStorage.extractEnergy(energy, false);
+        source.sendSuccess(() -> Component.literal("[CosmicReactors] Extracted " + energy + " RF."), false);
         return 1;
     }
 }

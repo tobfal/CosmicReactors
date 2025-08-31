@@ -3,8 +3,6 @@ package at.tobfal.cosmicreactors;
 import at.tobfal.cosmicreactors.client.render.PulsarReactorCoreEntityModel;
 import at.tobfal.cosmicreactors.client.render.PulsarReactorCoreRenderer;
 import at.tobfal.cosmicreactors.init.*;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -31,8 +29,8 @@ public class CosmicReactors {
     public CosmicReactors(IEventBus modEventBus) {
         modEventBus.addListener(this::commonSetup);
 
-        ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModItems.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModMenuTypes.register(modEventBus);
         ModEntityTypes.register(modEventBus);
