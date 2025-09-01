@@ -6,35 +6,35 @@ import net.minecraft.server.level.ServerLevel;
 import java.util.Map;
 import java.util.UUID;
 
-public class PulsarReactorAPI {
-    private PulsarReactorAPI() {}
+public class PenroseReactorAPI {
+    private PenroseReactorAPI() {}
 
     private static MultiblockSavedData getSavedData(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(MultiblockSavedData.ID);
     }
 
-    public static Map<UUID, PulsarReactorRecord> getAllReactors(ServerLevel level) {
+    public static Map<UUID, PenroseReactorRecord> getAllReactors(ServerLevel level) {
         var savedData = getSavedData(level);
-        return savedData.getPulsarReactors();
+        return savedData.getPenroseReactors();
     }
 
-    public static PulsarReactorRecord getOrCreateRecord(ServerLevel level, UUID id, ModEnergyStorage energyStorage) {
+    public static PenroseReactorRecord getOrCreateRecord(ServerLevel level, UUID id, ModEnergyStorage energyStorage) {
         var savedData = getSavedData(level);
-        return savedData.getOrCreatePulsarReactor(id, energyStorage);
+        return savedData.getOrCreatePenroseReactor(id, energyStorage);
     }
 
-    public static PulsarReactorRecord getRecord(ServerLevel level, UUID id) {
+    public static PenroseReactorRecord getRecord(ServerLevel level, UUID id) {
         var savedData = getSavedData(level);
-        return savedData.getPulsarReactor(id);
+        return savedData.getPenroseReactor(id);
     }
 
     public static void setEnergyStorage(ServerLevel level, UUID id, ModEnergyStorage energyStorage) {
         var savedData = getSavedData(level);
-        savedData.setPulsarReactorEnergyStorage(id, energyStorage);
+        savedData.setPenroseReactorEnergyStorage(id, energyStorage);
     }
 
     public static void removeRecord(ServerLevel level, UUID id) {
         var savedData = getSavedData(level);
-        savedData.removePulsarReactor(id);
+        savedData.removePenroseReactor(id);
     }
 }

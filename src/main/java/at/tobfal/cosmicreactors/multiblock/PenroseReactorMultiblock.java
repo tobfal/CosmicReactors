@@ -1,28 +1,35 @@
 package at.tobfal.cosmicreactors.multiblock;
 
-import at.tobfal.cosmicreactors.block.BasePulsarReactorBlock;
-import at.tobfal.cosmicreactors.block.PulsarReactorPortBlock;
-import at.tobfal.cosmicreactors.block.entity.PulsarReactorPortBlockEntity;
+import at.tobfal.cosmicreactors.block.BasePenroseReactorBlock;
+import at.tobfal.cosmicreactors.block.PenroseReactorPortBlock;
+import at.tobfal.cosmicreactors.block.entity.PenroseReactorPortBlockEntity;
 import at.tobfal.cosmicreactors.energy.ModEnergyStorage;
-import at.tobfal.cosmicreactors.entity.PulsarReactorCoreEntity;
+import at.tobfal.cosmicreactors.entity.PenroseReactorCoreEntity;
+import at.tobfal.cosmicreactors.menu.PenroseReactorMenu;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public final class PulsarReactorMultiblock {
-    private PulsarReactorMultiblock() {}
+public final class PenroseReactorMultiblock {
+    private PenroseReactorMultiblock() {}
 
     public record Result(boolean formed, AABB bounds, LongOpenHashSet members) {}
 
@@ -43,18 +50,18 @@ public final class PulsarReactorMultiblock {
 
         boolean hasPort = false;
         for (long l : r.members()) {
-            if (level.getBlockState(BlockPos.of(l)).getBlock() instanceof PulsarReactorPortBlock) {
+            if (level.getBlockState(BlockPos.of(l)).getBlock() instanceof PenroseReactorPortBlock) {
                 hasPort = true;
                 break;
             }
         }
         boolean formed = r.formed() && hasPort;
 
-        List<PulsarReactorPortBlockEntity> ports = new ArrayList<>();
+        List<PenroseReactorPortBlockEntity> ports = new ArrayList<>();
         for (long l : r.members()) {
             BlockPos p = BlockPos.of(l);
             var be = level.getBlockEntity(p);
-            if (be instanceof PulsarReactorPortBlockEntity port) {
+            if (be instanceof PenroseReactorPortBlockEntity port) {
                 ports.add(port);
             }
         }
@@ -80,9 +87,9 @@ public final class PulsarReactorMultiblock {
                 BlockPos centerPos = new BlockPos((int) center.x,(int) center.y,(int) center.z);
                 level.sendParticles(ParticleTypes.SCRAPE, center.x, center.y, center.z,50,1f,1f,1f,0.5f);
                 level.playSound(null, centerPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 2.0f, 0.4f);
-                level.addFreshEntity(new PulsarReactorCoreEntity(level, center.x, center.y, center.z));
+                level.addFreshEntity(new PenroseReactorCoreEntity(level, center.x, center.y, center.z));
 
-                PulsarReactorAPI.getOrCreateRecord(level, id, new ModEnergyStorage(1_000_000, 1_000_000, 1_000_000, 500_000));
+                PenroseReactorAPI.getOrCreateRecord(level, id, new ModEnergyStorage(1_000_000, 1_000_000, 1_000_000, 500_000));
             }
 
             for (var port : ports) {
@@ -98,7 +105,7 @@ public final class PulsarReactorMultiblock {
             }
 
             if (!level.isClientSide() && id != null){
-                PulsarReactorAPI.removeRecord(level, id);
+                PenroseReactorAPI.removeRecord(level, id);
             }
 
             for (var port : ports) {
@@ -110,7 +117,7 @@ public final class PulsarReactorMultiblock {
 
     private static boolean isPart(BlockState state) {
         // TODO: Probably a BlockTag is the better way
-        return state.getBlock() instanceof BasePulsarReactorBlock;
+        return state.getBlock() instanceof BasePenroseReactorBlock;
     }
 
     private static LongOpenHashSet flood(ServerLevel level, BlockPos start) {

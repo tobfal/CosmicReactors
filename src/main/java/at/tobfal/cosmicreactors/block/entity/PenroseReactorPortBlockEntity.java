@@ -1,8 +1,7 @@
 package at.tobfal.cosmicreactors.block.entity;
 
-import at.tobfal.cosmicreactors.energy.ModEnergyStorage;
 import at.tobfal.cosmicreactors.init.ModBlockEntities;
-import at.tobfal.cosmicreactors.multiblock.PulsarReactorAPI;
+import at.tobfal.cosmicreactors.multiblock.PenroseReactorAPI;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
@@ -18,12 +17,12 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class PulsarReactorPortBlockEntity extends BlockEntity implements IEnergyStorage, ITickableBlockEntity {
+public class PenroseReactorPortBlockEntity extends BlockEntity implements IEnergyStorage, ITickableBlockEntity {
     private boolean formed;
     private @Nullable UUID reactorId;
 
-    public PulsarReactorPortBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.PULSAR_REACTOR_PORT.get(), pos, state);
+    public PenroseReactorPortBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.PENROSE_REACTOR_PORT.get(), pos, state);
     }
 
     public void setFormed(boolean formed) {
@@ -73,11 +72,16 @@ public class PulsarReactorPortBlockEntity extends BlockEntity implements IEnergy
         }
 
         ServerLevel serverLevel = (ServerLevel)level;
-        ModEnergyStorage energyStorage = PulsarReactorAPI.getRecord(serverLevel, reactorId).energyStorage();
+        var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
+        if (record == null) {
+            return 0;
+        }
+
+        var energyStorage = record.energyStorage();
         int received = energyStorage.receiveEnergy(toReceive, simulate);
 
         if (!simulate) {
-            PulsarReactorAPI.setEnergyStorage(serverLevel, reactorId, energyStorage);
+            PenroseReactorAPI.setEnergyStorage(serverLevel, reactorId, energyStorage);
         }
 
         return received;
@@ -91,11 +95,16 @@ public class PulsarReactorPortBlockEntity extends BlockEntity implements IEnergy
         }
 
         ServerLevel serverLevel = (ServerLevel)level;
-        ModEnergyStorage energyStorage = PulsarReactorAPI.getRecord(serverLevel, reactorId).energyStorage();
+        var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
+        if (record == null) {
+            return 0;
+        }
+
+        var energyStorage = record.energyStorage();
         int extracted = energyStorage.extractEnergy(toExtract, simulate);
 
         if (!simulate) {
-            PulsarReactorAPI.setEnergyStorage(serverLevel, reactorId, energyStorage);
+            PenroseReactorAPI.setEnergyStorage(serverLevel, reactorId, energyStorage);
         }
 
         return extracted;
@@ -103,63 +112,82 @@ public class PulsarReactorPortBlockEntity extends BlockEntity implements IEnergy
 
     @Override
     public int getEnergyStored() {
-        var level = PulsarReactorPortBlockEntity.this.level;
+        var level = PenroseReactorPortBlockEntity.this.level;
         if (level == null || level.isClientSide() || !isReactorPart()) {
             return 0;
         }
 
         ServerLevel serverLevel = (ServerLevel)level;
-        ModEnergyStorage energyStorage = PulsarReactorAPI.getRecord(serverLevel, reactorId).energyStorage();
+        var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
+        if (record == null) {
+            return 0;
+        }
+
+        var energyStorage = record.energyStorage();
         return energyStorage.getEnergyStored();
     }
 
     @Override
     public int getMaxEnergyStored() {
-        var level = PulsarReactorPortBlockEntity.this.level;
+        var level = PenroseReactorPortBlockEntity.this.level;
         if (level == null || level.isClientSide() || !isReactorPart()) {
             return 0;
         }
 
         ServerLevel serverLevel = (ServerLevel)level;
-        ModEnergyStorage energyStorage = PulsarReactorAPI.getRecord(serverLevel, reactorId).energyStorage();
+        var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
+        if (record == null) {
+            return 0;
+        }
+
+        var energyStorage = record.energyStorage();
         return energyStorage.getMaxEnergyStored();
     }
 
     @Override
     public boolean canExtract() {
-        var level = PulsarReactorPortBlockEntity.this.level;
+        var level = PenroseReactorPortBlockEntity.this.level;
         if (level == null || level.isClientSide() || !isReactorPart()) {
             return false;
         }
 
         ServerLevel serverLevel = (ServerLevel)level;
-        ModEnergyStorage energyStorage = PulsarReactorAPI.getRecord(serverLevel, reactorId).energyStorage();
+        var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
+        if (record == null) {
+            return false;
+        }
+
+        var energyStorage = record.energyStorage();
         return energyStorage.canExtract();
     }
 
     @Override
     public boolean canReceive() {
-        var level = PulsarReactorPortBlockEntity.this.level;
+        var level = PenroseReactorPortBlockEntity.this.level;
         if (level == null || level.isClientSide() || !isReactorPart()) {
             return false;
         }
 
         ServerLevel serverLevel = (ServerLevel)level;
-        ModEnergyStorage energyStorage = PulsarReactorAPI.getRecord(serverLevel, reactorId).energyStorage();
+        var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
+        if (record == null) {
+            return false;
+        }
+
+        var energyStorage = record.energyStorage();
         return energyStorage.canReceive();
     }
 
-
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState state) {
-        if (level.isClientSide()) {
+        if (level.isClientSide() || !isReactorPart()) {
             return;
         }
 
         transferEnergy(level, blockPos, state, this);
     }
 
-    private static void transferEnergy(Level level, BlockPos blockPos, BlockState state, PulsarReactorPortBlockEntity blockEntity) {
+    private static void transferEnergy(Level level, BlockPos blockPos, BlockState state, PenroseReactorPortBlockEntity blockEntity) {
         if (level.isClientSide()) {
             return;
         }

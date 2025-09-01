@@ -12,21 +12,21 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
-public class PulsarReactorCoreEntity extends Entity {
+public class PenroseReactorCoreEntity extends Entity {
     public double baseY;
 
-    public PulsarReactorCoreEntity(EntityType<?> entityType, Level level) {
+    public PenroseReactorCoreEntity(EntityType<?> entityType, Level level) {
         super(entityType, level);
         this.blocksBuilding = false;
     }
 
-    public PulsarReactorCoreEntity(Level level, double x, double y, double z) {
-        this(ModEntityTypes.PULSAR_REACTOR_CORE.get(), level);
+    public PenroseReactorCoreEntity(Level level, double x, double y, double z) {
+        this(ModEntityTypes.PENROSE_REACTOR_CORE.get(), level);
         this.setPos(x, y, z);
         this.baseY = y;
     }
 
-    public PulsarReactorCoreEntity(Level level, Vec3 pos) {
+    public PenroseReactorCoreEntity(Level level, Vec3 pos) {
         this(level, pos.x, pos.y, pos.z);
     }
 

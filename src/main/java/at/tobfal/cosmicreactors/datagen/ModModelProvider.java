@@ -15,11 +15,11 @@ public class ModModelProvider extends ModelProvider {
 
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-        blockModels.createTrivialCube(ModBlocks.PULSAR_REACTOR_CASING.get());
+        blockModels.createTrivialCube(ModBlocks.PENROSE_REACTOR_CASING.get());
         blockModels.createTrivialBlock(
-                ModBlocks.PULSAR_REACTOR_GLASS.get(),
+                ModBlocks.PENROSE_REACTOR_GLASS.get(),
                 TexturedModel.CUBE.updateTemplate(t -> t.extend().renderType("minecraft:translucent").build())
         );
-        blockModels.createTrivialCube(ModBlocks.PULSAR_REACTOR_PORT.get());
+        blockModels.createTrivialCube(ModBlocks.PENROSE_REACTOR_PORT.get());
     }
 }

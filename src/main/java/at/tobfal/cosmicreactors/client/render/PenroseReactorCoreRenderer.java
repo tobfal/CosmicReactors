@@ -1,7 +1,7 @@
 package at.tobfal.cosmicreactors.client.render;
 
 import at.tobfal.cosmicreactors.CosmicReactors;
-import at.tobfal.cosmicreactors.entity.PulsarReactorCoreEntity;
+import at.tobfal.cosmicreactors.entity.PenroseReactorCoreEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -14,15 +14,15 @@ import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
-public class PulsarReactorCoreRenderer extends EntityRenderer<PulsarReactorCoreEntity, EntityRenderState> {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(CosmicReactors.getResourceLocation("pulsar_reactor_core"), "main");
-    private static final ResourceLocation TEXTURE = CosmicReactors.getResourceLocation("textures/entity/pulsar_reactor_core.png");
+public class PenroseReactorCoreRenderer extends EntityRenderer<PenroseReactorCoreEntity, EntityRenderState> {
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(CosmicReactors.getResourceLocation("penrose_reactor_core"), "main");
+    private static final ResourceLocation TEXTURE = CosmicReactors.getResourceLocation("textures/entity/penrose_reactor_core.png");
 
-    private final PulsarReactorCoreEntityModel model;
+    private final PenroseReactorCoreEntityModel model;
 
-    public PulsarReactorCoreRenderer(EntityRendererProvider.Context context) {
+    public PenroseReactorCoreRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.model = new PulsarReactorCoreEntityModel(context.bakeLayer(LAYER_LOCATION));
+        this.model = new PenroseReactorCoreEntityModel(context.bakeLayer(LAYER_LOCATION));
         this.shadowRadius = 0.0F;
     }
 

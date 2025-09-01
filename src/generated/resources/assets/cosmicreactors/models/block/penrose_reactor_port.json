@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "cosmicreactors:block/pulsar_reactor_port"
+    "all": "cosmicreactors:block/penrose_reactor_port"
   }
 }

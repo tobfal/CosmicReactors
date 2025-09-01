@@ -1,8 +1,8 @@
 package at.tobfal.cosmicreactors.init;
 
 import at.tobfal.cosmicreactors.CosmicReactors;
-import at.tobfal.cosmicreactors.block.BasePulsarReactorBlock;
-import at.tobfal.cosmicreactors.block.PulsarReactorPortBlock;
+import at.tobfal.cosmicreactors.block.BasePenroseReactorBlock;
+import at.tobfal.cosmicreactors.block.PenroseReactorPortBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -15,13 +15,13 @@ import java.util.function.Function;
 public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(CosmicReactors.MODID);
 
-    // Pulsar Fragment Reactor
-    public static final DeferredBlock<Block> PULSAR_REACTOR_CASING = registerBlock("pulsar_reactor_casing",
-            BasePulsarReactorBlock::new);
-    public static final DeferredBlock<Block> PULSAR_REACTOR_GLASS = registerBlock("pulsar_reactor_glass",
-            properties -> new BasePulsarReactorBlock(properties.noOcclusion().isViewBlocking((s,l,p) -> false)));
-    public static final DeferredBlock<Block> PULSAR_REACTOR_PORT = registerBlock("pulsar_reactor_port",
-            PulsarReactorPortBlock::new);
+    // Penrose Reactor
+    public static final DeferredBlock<Block> PENROSE_REACTOR_CASING = registerBlock("penrose_reactor_casing",
+            BasePenroseReactorBlock::new);
+    public static final DeferredBlock<Block> PENROSE_REACTOR_GLASS = registerBlock("penrose_reactor_glass",
+            properties -> new BasePenroseReactorBlock(properties.noOcclusion().isViewBlocking((s, l, p) -> false)));
+    public static final DeferredBlock<Block> PENROSE_REACTOR_PORT = registerBlock("penrose_reactor_port",
+            PenroseReactorPortBlock::new);
 
     private static <T extends Block> void registerBlockItem(String name, DeferredBlock<T> block) {
         ModItems.ITEMS.registerItem(name, (properties) -> new BlockItem(block.get(), properties.useBlockDescriptionPrefix()));

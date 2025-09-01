@@ -1,6 +1,6 @@
 package at.tobfal.cosmicreactors.command;
 
-import at.tobfal.cosmicreactors.multiblock.PulsarReactorAPI;
+import at.tobfal.cosmicreactors.multiblock.PenroseReactorAPI;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.CommandSourceStack;
@@ -11,7 +11,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
 
 public class CosmicReactorsCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -19,7 +18,7 @@ public class CosmicReactorsCommand {
                 Commands.literal("cosmicreactors")
                         .requires(source -> source.hasPermission(2))
                         .then(Commands.literal("debug")
-                                .then(Commands.literal("pulsarreactors")
+                                .then(Commands.literal("penrosereactors")
                                         .executes(ctx -> listReactors(ctx.getSource()))
                                 )
                                 .then(Commands.literal("energy")
@@ -43,12 +42,12 @@ public class CosmicReactorsCommand {
 
     private static int listReactors(CommandSourceStack source) {
         ServerLevel level = source.getServer().overworld();
-        var reactors = PulsarReactorAPI.getAllReactors(level);
+        var reactors = PenroseReactorAPI.getAllReactors(level);
 
         if (reactors.isEmpty()) {
-            source.sendSuccess(() -> Component.literal("[CosmicReactors] No Pulsar Reactors registered."), false);
+            source.sendSuccess(() -> Component.literal("[CosmicReactors] No Penrose Reactors registered."), false);
         } else {
-            source.sendSuccess(() -> Component.literal("[CosmicReactors] Registered Pulsar Reactors:"), false);
+            source.sendSuccess(() -> Component.literal("[CosmicReactors] Registered Penrose Reactors:"), false);
             for (var entry : reactors.entrySet()) {
                 var reactor = entry.getValue();
                 source.sendSuccess(() -> Component.literal("- " + reactor.id().toString() + " --- " +  reactor.energyStorage().getEnergyStored()), false);
@@ -68,7 +67,7 @@ public class CosmicReactorsCommand {
         }
 
         int energy = energyStorage.getEnergyStored();
-        source.sendSuccess(() -> Component.literal("[CosmicReactors] Energy level: " + energy + " RF."), false);
+        source.sendSuccess(() -> Component.literal("[CosmicReactors] Energy level: " + energy + " FE."), false);
         return 1;
     }
 
@@ -83,7 +82,7 @@ public class CosmicReactorsCommand {
         }
 
         int extracted = energyStorage.extractEnergy(energy, false);
-        source.sendSuccess(() -> Component.literal("[CosmicReactors] Extracted " + energy + " RF."), false);
+        source.sendSuccess(() -> Component.literal("[CosmicReactors] Extracted " + energy + " FE."), false);
         return 1;
     }
 }

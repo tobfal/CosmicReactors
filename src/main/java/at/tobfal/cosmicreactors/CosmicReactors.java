@@ -1,7 +1,8 @@
 package at.tobfal.cosmicreactors;
 
-import at.tobfal.cosmicreactors.client.render.PulsarReactorCoreEntityModel;
-import at.tobfal.cosmicreactors.client.render.PulsarReactorCoreRenderer;
+import at.tobfal.cosmicreactors.client.render.PenroseReactorCoreEntityModel;
+import at.tobfal.cosmicreactors.client.render.PenroseReactorCoreRenderer;
+import at.tobfal.cosmicreactors.client.screen.PenroseReactorScreen;
 import at.tobfal.cosmicreactors.init.*;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
@@ -50,18 +51,19 @@ public class CosmicReactors {
         @SubscribeEvent
         public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
             event.registerLayerDefinition(
-                    PulsarReactorCoreRenderer.LAYER_LOCATION,
-                    PulsarReactorCoreEntityModel::createBodyLayer
+                    PenroseReactorCoreRenderer.LAYER_LOCATION,
+                    PenroseReactorCoreEntityModel::createBodyLayer
             );
         }
 
         @SubscribeEvent
         public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-            event.registerEntityRenderer(ModEntityTypes.PULSAR_REACTOR_CORE.get(), PulsarReactorCoreRenderer::new);
+            event.registerEntityRenderer(ModEntityTypes.PENROSE_REACTOR_CORE.get(), PenroseReactorCoreRenderer::new);
         }
 
         @SubscribeEvent
         public static void registerMenuScreens(RegisterMenuScreensEvent event) {
+            event.register(ModMenuTypes.PENROSE_REACTOR_MENU.get(), PenroseReactorScreen::new);
         }
     }
 

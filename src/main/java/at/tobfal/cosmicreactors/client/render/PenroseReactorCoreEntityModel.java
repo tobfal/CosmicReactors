@@ -6,10 +6,10 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 
-public class PulsarReactorCoreEntityModel extends EntityModel<EntityRenderState> {
+public class PenroseReactorCoreEntityModel extends EntityModel<EntityRenderState> {
     private final ModelPart main;
 
-    public PulsarReactorCoreEntityModel(ModelPart root) {
+    public PenroseReactorCoreEntityModel(ModelPart root) {
         super(root);
         this.main = root.getChild("main");
     }

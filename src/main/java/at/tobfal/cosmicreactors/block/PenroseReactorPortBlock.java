@@ -1,7 +1,7 @@
 package at.tobfal.cosmicreactors.block;
 
 import at.tobfal.cosmicreactors.block.entity.ITickableBlockEntity;
-import at.tobfal.cosmicreactors.block.entity.PulsarReactorPortBlockEntity;
+import at.tobfal.cosmicreactors.block.entity.PenroseReactorPortBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
@@ -12,14 +12,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class PulsarReactorPortBlock extends BasePulsarReactorBlock implements EntityBlock {
-    public PulsarReactorPortBlock(Properties properties) {
+public class PenroseReactorPortBlock extends BasePenroseReactorBlock implements EntityBlock {
+    public PenroseReactorPortBlock(Properties properties) {
         super(properties);
     }
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new PulsarReactorPortBlockEntity(pos, state);
+        return new PenroseReactorPortBlockEntity(pos, state);
     }
 
     @Nullable
