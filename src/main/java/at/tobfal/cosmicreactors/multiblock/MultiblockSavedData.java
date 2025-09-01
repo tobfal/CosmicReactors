@@ -3,11 +3,13 @@ package at.tobfal.cosmicreactors.multiblock;
 import at.tobfal.cosmicreactors.energy.ModEnergyStorage;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -34,10 +36,10 @@ public class MultiblockSavedData extends SavedData {
         return penroseReactors;
     }
 
-    public PenroseReactorRecord getOrCreatePenroseReactor(UUID id, ModEnergyStorage energyStorage) {
+    public PenroseReactorRecord getOrCreatePenroseReactor(UUID id, ModEnergyStorage energyStorage, List<BlockPos> memberPositions) {
         var record = getPenroseReactor(id);
         if (record == null) {
-            record = new PenroseReactorRecord(id, energyStorage);
+            record = new PenroseReactorRecord(id, energyStorage, memberPositions);
             penroseReactors.put(id, record);
             setDirty();
         }
@@ -55,7 +57,7 @@ public class MultiblockSavedData extends SavedData {
             return;
         }
 
-        PenroseReactorRecord updatedRecord = new PenroseReactorRecord(record.id(), energyStorage);
+        PenroseReactorRecord updatedRecord = new PenroseReactorRecord(record.id(), energyStorage, record.memberPositions());
         penroseReactors.put(id, updatedRecord);
         setDirty();
     }

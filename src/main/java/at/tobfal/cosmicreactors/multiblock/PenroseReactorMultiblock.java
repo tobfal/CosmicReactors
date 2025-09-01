@@ -56,10 +56,12 @@ public final class PenroseReactorMultiblock {
             }
         }
         boolean formed = r.formed() && hasPort;
+        List<BlockPos> memberPositions = new ArrayList<>();
 
         List<PenroseReactorPortBlockEntity> ports = new ArrayList<>();
         for (long l : r.members()) {
             BlockPos p = BlockPos.of(l);
+            memberPositions.add(p);
             var be = level.getBlockEntity(p);
             if (be instanceof PenroseReactorPortBlockEntity port) {
                 ports.add(port);
@@ -89,7 +91,7 @@ public final class PenroseReactorMultiblock {
                 level.playSound(null, centerPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 2.0f, 0.4f);
                 level.addFreshEntity(new PenroseReactorCoreEntity(level, center.x, center.y, center.z));
 
-                PenroseReactorAPI.getOrCreateRecord(level, id, new ModEnergyStorage(1_000_000, 1_000_000, 1_000_000, 500_000));
+                PenroseReactorAPI.getOrCreateRecord(level, id, new ModEnergyStorage(1_000_000, 1_000_000, 1_000_000, 500_000), memberPositions);
             }
 
             for (var port : ports) {

@@ -6,7 +6,7 @@ import net.neoforged.neoforge.energy.EnergyStorage;
 
 public class ModEnergyStorage extends EnergyStorage {
     public static final Codec<ModEnergyStorage> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.INT.fieldOf("capacity").forGetter(ModEnergyStorage::getCapacity),
+            Codec.INT.fieldOf("capacity").forGetter(ModEnergyStorage::getMaxEnergyStored),
             Codec.INT.fieldOf("maxReceive").forGetter(ModEnergyStorage::getMaxReceive),
             Codec.INT.fieldOf("maxExtract").forGetter(ModEnergyStorage::getMaxExtract),
             Codec.INT.fieldOf("stored").forGetter(ModEnergyStorage::getEnergyStored)
@@ -20,7 +20,11 @@ public class ModEnergyStorage extends EnergyStorage {
         this(capacity, maxReceive, maxExtract, 0);
     }
 
-    public int getCapacity()   { return this.capacity; }
-    public int getMaxReceive() { return this.maxReceive; }
-    public int getMaxExtract() { return this.maxExtract; }
+    public int getMaxReceive() {
+        return this.maxReceive;
+    }
+
+    public int getMaxExtract() {
+        return this.maxExtract;
+    }
 }
