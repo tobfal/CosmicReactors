@@ -163,19 +163,7 @@ public class PenroseReactorPortBlockEntity extends BlockEntity implements IEnerg
 
     @Override
     public boolean canReceive() {
-        var level = PenroseReactorPortBlockEntity.this.level;
-        if (level == null || level.isClientSide() || !isReactorPart()) {
-            return false;
-        }
-
-        ServerLevel serverLevel = (ServerLevel)level;
-        var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
-        if (record == null) {
-            return false;
-        }
-
-        var energyStorage = record.energyStorage();
-        return energyStorage.canReceive();
+        return false;
     }
 
     @Override

@@ -15,7 +15,6 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class CosmicReactors {
     public static final String MODID = "cosmicreactors";
     public static final String MODNAME = ModList.get().getModFileById(MODID).moduleName();
-    public static final String VERSION = ModList.get().getModFileById(MODID).versionString();
+     static final String VERSION = ModList.get().getModFileById(MODID).versionString();
 
     public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
@@ -35,8 +34,6 @@ public class CosmicReactors {
         ModBlockEntities.register(modEventBus);
         ModMenuTypes.register(modEventBus);
         ModEntityTypes.register(modEventBus);
-
-        NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

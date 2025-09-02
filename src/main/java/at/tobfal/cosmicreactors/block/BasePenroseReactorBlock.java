@@ -1,6 +1,7 @@
 package at.tobfal.cosmicreactors.block;
 
 import at.tobfal.cosmicreactors.energy.ModEnergyStorage;
+import at.tobfal.cosmicreactors.energy.ModMassStorage;
 import at.tobfal.cosmicreactors.menu.PenroseReactorMenu;
 import at.tobfal.cosmicreactors.multiblock.PenroseReactorAPI;
 import at.tobfal.cosmicreactors.multiblock.PenroseReactorMultiblock;
@@ -60,9 +61,12 @@ public class BasePenroseReactorBlock extends Block {
             public int get(int index) {
                 var reactor = PenroseReactorAPI.getRecord(serverLevel, reactorId);
                 ModEnergyStorage energyStorage = reactor.energyStorage();
+                ModMassStorage  massStorage = reactor.massStorage();
                 return switch (index) {
                     case 0 -> energyStorage.getEnergyStored();
                     case 1 -> energyStorage.getMaxEnergyStored();
+                    case 2 -> massStorage.getMass();
+                    case 3 -> massStorage.getCriticalMass();
                     default -> 0;
                 };
             }
@@ -73,7 +77,7 @@ public class BasePenroseReactorBlock extends Block {
 
             @Override
             public int getCount() {
-                return 2;
+                return 4;
             }
         };
 

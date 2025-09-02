@@ -16,7 +16,7 @@ public class PenroseReactorMenu extends AbstractContainerMenu {
     protected final ContainerData data;
 
     public PenroseReactorMenu(int containerId, Inventory inv, FriendlyByteBuf extraData) {
-        this(containerId, inv, extraData.readUUID(), new SimpleContainerData(2));
+        this(containerId, inv, extraData.readUUID(), new SimpleContainerData(4));
     }
 
     public PenroseReactorMenu(int containerId, Inventory playerInventory, UUID reactorId, ContainerData containerData) {
@@ -62,8 +62,21 @@ public class PenroseReactorMenu extends AbstractContainerMenu {
         return this.data.get(1);
     }
 
+    public int getMass() {
+        return this.data.get(2);
+    }
+
+    public int getCriticalMass() {
+        return this.data.get(3);
+    }
+
     public double getEnergyLevel() {
         double percentage = ((double) getEnergyStored())/((double) getMaxEnergyStored());
+        return Math.min(1.0, Math.max(0.0, percentage));
+    }
+
+    public double getMassLevel() {
+        double percentage = ((double) getMass())/((double) getCriticalMass());
         return Math.min(1.0, Math.max(0.0, percentage));
     }
 }

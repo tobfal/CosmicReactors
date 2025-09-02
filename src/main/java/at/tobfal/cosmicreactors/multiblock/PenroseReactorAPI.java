@@ -1,6 +1,7 @@
 package at.tobfal.cosmicreactors.multiblock;
 
 import at.tobfal.cosmicreactors.energy.ModEnergyStorage;
+import at.tobfal.cosmicreactors.energy.ModMassStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 
@@ -21,9 +22,9 @@ public class PenroseReactorAPI {
         return savedData.getPenroseReactors();
     }
 
-    public static PenroseReactorRecord getOrCreateRecord(ServerLevel level, UUID id, ModEnergyStorage energyStorage, List<BlockPos> memberPositions) {
+    public static PenroseReactorRecord getOrCreateRecord(ServerLevel level, UUID id, ModEnergyStorage energyStorage, ModMassStorage massStorage, List<BlockPos> memberPositions) {
         var savedData = getSavedData(level);
-        return savedData.getOrCreatePenroseReactor(id, energyStorage, memberPositions);
+        return savedData.getOrCreatePenroseReactor(id, energyStorage, massStorage, memberPositions);
     }
 
     public static PenroseReactorRecord getRecord(ServerLevel level, UUID id) {
@@ -34,6 +35,11 @@ public class PenroseReactorAPI {
     public static void setEnergyStorage(ServerLevel level, UUID id, ModEnergyStorage energyStorage) {
         var savedData = getSavedData(level);
         savedData.setPenroseReactorEnergyStorage(id, energyStorage);
+    }
+
+    public static void setMassStorage(ServerLevel level, UUID id, ModMassStorage massStorage) {
+        var savedData = getSavedData(level);
+        savedData.setPenroseReactorEnergyStorage(id, massStorage);
     }
 
     public static void removeRecord(ServerLevel level, UUID id) {

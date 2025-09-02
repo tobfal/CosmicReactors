@@ -4,25 +4,19 @@ import at.tobfal.cosmicreactors.block.BasePenroseReactorBlock;
 import at.tobfal.cosmicreactors.block.PenroseReactorPortBlock;
 import at.tobfal.cosmicreactors.block.entity.PenroseReactorPortBlockEntity;
 import at.tobfal.cosmicreactors.energy.ModEnergyStorage;
+import at.tobfal.cosmicreactors.energy.ModMassStorage;
 import at.tobfal.cosmicreactors.entity.PenroseReactorCoreEntity;
-import at.tobfal.cosmicreactors.menu.PenroseReactorMenu;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,7 +85,11 @@ public final class PenroseReactorMultiblock {
                 level.playSound(null, centerPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 2.0f, 0.4f);
                 level.addFreshEntity(new PenroseReactorCoreEntity(level, center.x, center.y, center.z));
 
-                PenroseReactorAPI.getOrCreateRecord(level, id, new ModEnergyStorage(1_000_000, 1_000_000, 1_000_000, 500_000), memberPositions);
+                PenroseReactorAPI.getOrCreateRecord(level,id,
+                        new ModEnergyStorage(1_000_000, 1_000_000, 1_000_000, 0),
+                        new ModMassStorage(1_000_000, 1_000_000),
+                        memberPositions
+                );
             }
 
             for (var port : ports) {
@@ -118,7 +116,6 @@ public final class PenroseReactorMultiblock {
     }
 
     private static boolean isPart(BlockState state) {
-        // TODO: Probably a BlockTag is the better way
         return state.getBlock() instanceof BasePenroseReactorBlock;
     }
 

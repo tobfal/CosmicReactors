@@ -1,6 +1,7 @@
 package at.tobfal.cosmicreactors.multiblock;
 
 import at.tobfal.cosmicreactors.energy.ModEnergyStorage;
+import at.tobfal.cosmicreactors.energy.ModMassStorage;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
@@ -36,10 +37,10 @@ public class MultiblockSavedData extends SavedData {
         return penroseReactors;
     }
 
-    public PenroseReactorRecord getOrCreatePenroseReactor(UUID id, ModEnergyStorage energyStorage, List<BlockPos> memberPositions) {
+    public PenroseReactorRecord getOrCreatePenroseReactor(UUID id, ModEnergyStorage energyStorage, ModMassStorage massStorage, List<BlockPos> memberPositions) {
         var record = getPenroseReactor(id);
         if (record == null) {
-            record = new PenroseReactorRecord(id, energyStorage, memberPositions);
+            record = new PenroseReactorRecord(id, energyStorage, massStorage, memberPositions);
             penroseReactors.put(id, record);
             setDirty();
         }
@@ -57,7 +58,18 @@ public class MultiblockSavedData extends SavedData {
             return;
         }
 
-        PenroseReactorRecord updatedRecord = new PenroseReactorRecord(record.id(), energyStorage, record.memberPositions());
+        PenroseReactorRecord updatedRecord = new PenroseReactorRecord(record.id(), energyStorage, record.massStorage(), record.memberPositions());
+        penroseReactors.put(id, updatedRecord);
+        setDirty();
+    }
+
+    public void setPenroseReactorEnergyStorage(UUID id, ModMassStorage massStorage) {
+        PenroseReactorRecord record = penroseReactors.get(id);
+        if (record == null){
+            return;
+        }
+
+        PenroseReactorRecord updatedRecord = new PenroseReactorRecord(record.id(), record.energyStorage(), massStorage, record.memberPositions());
         penroseReactors.put(id, updatedRecord);
         setDirty();
     }
