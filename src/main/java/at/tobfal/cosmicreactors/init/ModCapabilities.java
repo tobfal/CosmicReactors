@@ -10,6 +10,7 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 public class ModCapabilities {
     @SubscribeEvent
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.PENROSE_REACTOR_PORT.get(), (entity, side) -> entity);
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.PENROSE_REACTOR_PORT.get(), (entity, side) -> entity.ENERGY_HANDLER);
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.PENROSE_REACTOR_PORT.get(), (entity, side) -> entity.ITEM_HANDLER);
     }
 }

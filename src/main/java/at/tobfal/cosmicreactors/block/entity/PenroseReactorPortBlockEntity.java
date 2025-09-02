@@ -1,11 +1,14 @@
 package at.tobfal.cosmicreactors.block.entity;
 
+import at.tobfal.cosmicreactors.energy.ModMassStorage;
 import at.tobfal.cosmicreactors.init.ModBlockEntities;
+import at.tobfal.cosmicreactors.init.ModItems;
 import at.tobfal.cosmicreactors.multiblock.PenroseReactorAPI;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,11 +16,161 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class PenroseReactorPortBlockEntity extends BlockEntity implements IEnergyStorage, ITickableBlockEntity {
+public class PenroseReactorPortBlockEntity extends BlockEntity implements ITickableBlockEntity {
+    public final IEnergyStorage ENERGY_HANDLER = new IEnergyStorage() {
+        @Override
+        public int receiveEnergy(int toReceive, boolean simulate) {
+            var level = getLevel();
+            if (level == null || level.isClientSide() || !isFormed() || !isReactorPart()) {
+                return 0;
+            }
+
+            ServerLevel serverLevel = (ServerLevel)level;
+            var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
+            if (record == null) {
+                return 0;
+            }
+
+            var energyStorage = record.energyStorage();
+            int received = energyStorage.receiveEnergy(toReceive, simulate);
+
+            if (!simulate) {
+                PenroseReactorAPI.setEnergyStorage(serverLevel, reactorId, energyStorage);
+            }
+
+            return received;
+        }
+
+        @Override
+        public int extractEnergy(int toExtract, boolean simulate) {
+            var level = getLevel();
+            if (level == null || level.isClientSide() || !isReactorPart()) {
+                return 0;
+            }
+
+            ServerLevel serverLevel = (ServerLevel)level;
+            var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
+            if (record == null) {
+                return 0;
+            }
+
+            var energyStorage = record.energyStorage();
+            int extracted = energyStorage.extractEnergy(toExtract, simulate);
+
+            if (!simulate) {
+                PenroseReactorAPI.setEnergyStorage(serverLevel, reactorId, energyStorage);
+            }
+
+            return extracted;
+        }
+
+        @Override
+        public int getEnergyStored() {
+            var level = PenroseReactorPortBlockEntity.this.level;
+            if (level == null || level.isClientSide() || !isReactorPart()) {
+                return 0;
+            }
+
+            ServerLevel serverLevel = (ServerLevel)level;
+            var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
+            if (record == null) {
+                return 0;
+            }
+
+            var energyStorage = record.energyStorage();
+            return energyStorage.getEnergyStored();
+        }
+
+        @Override
+        public int getMaxEnergyStored() {
+            var level = PenroseReactorPortBlockEntity.this.level;
+            if (level == null || level.isClientSide() || !isReactorPart()) {
+                return 0;
+            }
+
+            ServerLevel serverLevel = (ServerLevel)level;
+            var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
+            if (record == null) {
+                return 0;
+            }
+
+            var energyStorage = record.energyStorage();
+            return energyStorage.getMaxEnergyStored();
+        }
+
+        @Override
+        public boolean canExtract() {
+            var level = PenroseReactorPortBlockEntity.this.level;
+            if (level == null || level.isClientSide() || !isReactorPart()) {
+                return false;
+            }
+
+            ServerLevel serverLevel = (ServerLevel)level;
+            var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
+            if (record == null) {
+                return false;
+            }
+
+            var energyStorage = record.energyStorage();
+            return energyStorage.canExtract();
+        }
+
+        @Override
+        public boolean canReceive() {
+            return false;
+        }
+    };
+    public final ItemStackHandler ITEM_HANDLER = new ItemStackHandler() {
+        @Override
+        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+            if (stack.isEmpty())
+                return ItemStack.EMPTY;
+
+            if (!isItemValid(slot, stack))
+                return stack;
+
+            if (simulate) {
+                return ItemStack.EMPTY;
+            }
+
+            var level = PenroseReactorPortBlockEntity.this.level;
+            if (level == null || level.isClientSide()) {
+                return ItemStack.EMPTY;
+            }
+
+            ServerLevel serverLevel = (ServerLevel)level;
+            var record = PenroseReactorAPI.getRecord(serverLevel, PenroseReactorPortBlockEntity.this.reactorId);
+            if (record == null) {
+                return ItemStack.EMPTY;
+            }
+
+            int massToAdd = stack.getCount() * 100;
+            if (stack.is(ModItems.DENSE_MATTER_CLUMP.get())) {
+                massToAdd *= 9;
+            }
+
+            ModMassStorage massStorage = record.massStorage();
+            massStorage.addMass(massToAdd, false);
+            PenroseReactorAPI.setMassStorage(serverLevel, PenroseReactorPortBlockEntity.this.reactorId, massStorage);
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return stack.is(ModItems.DENSE_MATTER_PARTICLE.get()) || stack.is(ModItems.DENSE_MATTER_CLUMP.get());
+        }
+    };
+
     private boolean formed;
     private @Nullable UUID reactorId;
 
@@ -65,108 +218,6 @@ public class PenroseReactorPortBlockEntity extends BlockEntity implements IEnerg
     }
 
     @Override
-    public int receiveEnergy(int toReceive, boolean simulate) {
-        var level = getLevel();
-        if (level == null || level.isClientSide() || !isFormed() || !isReactorPart()) {
-            return 0;
-        }
-
-        ServerLevel serverLevel = (ServerLevel)level;
-        var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
-        if (record == null) {
-            return 0;
-        }
-
-        var energyStorage = record.energyStorage();
-        int received = energyStorage.receiveEnergy(toReceive, simulate);
-
-        if (!simulate) {
-            PenroseReactorAPI.setEnergyStorage(serverLevel, reactorId, energyStorage);
-        }
-
-        return received;
-    }
-
-    @Override
-    public int extractEnergy(int toExtract, boolean simulate) {
-        var level = getLevel();
-        if (level == null || level.isClientSide() || !isReactorPart()) {
-            return 0;
-        }
-
-        ServerLevel serverLevel = (ServerLevel)level;
-        var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
-        if (record == null) {
-            return 0;
-        }
-
-        var energyStorage = record.energyStorage();
-        int extracted = energyStorage.extractEnergy(toExtract, simulate);
-
-        if (!simulate) {
-            PenroseReactorAPI.setEnergyStorage(serverLevel, reactorId, energyStorage);
-        }
-
-        return extracted;
-    }
-
-    @Override
-    public int getEnergyStored() {
-        var level = PenroseReactorPortBlockEntity.this.level;
-        if (level == null || level.isClientSide() || !isReactorPart()) {
-            return 0;
-        }
-
-        ServerLevel serverLevel = (ServerLevel)level;
-        var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
-        if (record == null) {
-            return 0;
-        }
-
-        var energyStorage = record.energyStorage();
-        return energyStorage.getEnergyStored();
-    }
-
-    @Override
-    public int getMaxEnergyStored() {
-        var level = PenroseReactorPortBlockEntity.this.level;
-        if (level == null || level.isClientSide() || !isReactorPart()) {
-            return 0;
-        }
-
-        ServerLevel serverLevel = (ServerLevel)level;
-        var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
-        if (record == null) {
-            return 0;
-        }
-
-        var energyStorage = record.energyStorage();
-        return energyStorage.getMaxEnergyStored();
-    }
-
-    @Override
-    public boolean canExtract() {
-        var level = PenroseReactorPortBlockEntity.this.level;
-        if (level == null || level.isClientSide() || !isReactorPart()) {
-            return false;
-        }
-
-        ServerLevel serverLevel = (ServerLevel)level;
-        var record = PenroseReactorAPI.getRecord(serverLevel, reactorId);
-        if (record == null) {
-            return false;
-        }
-
-        var energyStorage = record.energyStorage();
-        return energyStorage.canExtract();
-    }
-
-    @Override
-    public boolean canReceive() {
-        return false;
-    }
-
-    @Override
     public void tick(Level level, BlockPos blockPos, BlockState state) {
         if (level.isClientSide() || !isReactorPart()) {
             return;
@@ -192,13 +243,13 @@ public class PenroseReactorPortBlockEntity extends BlockEntity implements IEnerg
                 continue;
             }
 
-            int toExtract = blockEntity.extractEnergy(blockEntity.getEnergyStored(), true);
+            int toExtract = blockEntity.ENERGY_HANDLER.extractEnergy(blockEntity.ENERGY_HANDLER.getEnergyStored(), true);
             toExtract = foreignEnergyStorage.receiveEnergy(toExtract, false);
             if (toExtract <= 0) {
                 continue;
             }
 
-            blockEntity.extractEnergy(toExtract, false);
+            blockEntity.ENERGY_HANDLER.extractEnergy(toExtract, false);
         }
     }
 }
